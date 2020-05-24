@@ -1,0 +1,27 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="baidu-site-verification" content="1EB8XoOl0C"><meta name="google-site-verification" content="K7thEgdLm0UfRWJ5MGdF7sCcjClSzAlxFLPv2Oz5CGM"><title> netty基础之TCP粘包拆包问题 · 马小琥's blogs</title><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="netty基础之TCP粘包拆包问题 - 马小琥"><meta name="keywords" content="学习 java 网络"><meta name="author" content="马小琥"><link rel="short icon" href="/images/favicon.ico"><link rel="stylesheet" href="/css/bubuzou.css"><link rel="search" type="application/opensearchdescription+xml" href="http://yoursite.com/atom.xml" title="马小琥's blogs"><script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src='//unpkg.com/valine/dist/Valine.min.js'></script><meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="马小琥's blogs" type="application/atom+xml">
+</head><body><header><div class="header row"> <a href="/" class="logo-link"><img src="/images/logo.png"></a><ul id="nav_list" class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" data-hover="博文" class="nav-list-link">博文</a></li><li class="nav-list-item"><a href="/archives/" target="_self" data-hover="归档" class="nav-list-link">归档</a></li><li class="nav-list-item"><a href="/categories/live/" target="_self" data-hover="生活" class="nav-list-link">生活</a></li><li class="nav-list-item"><a href="/categories/film/" target="_self" data-hover="摄影" class="nav-list-link">摄影</a></li><li class="nav-list-item"><a href="/about" target="_self" data-hover="关于" class="nav-list-link">关于</a></li></ul><div class="search"><a id="search_btn" href="#search"></a></div><div id="nav_btn" class="nav-btn"><span></span><span></span><span></span></div></div></header><div class="row scroll-con"><section class="container"><!-- for archive page--><div id="postAr" class="post"><article class="post-block"><h1 class="post-title">netty基础之TCP粘包拆包问题</h1><div class="post-info">2017-04-24 10:25:34</div><div class="post-content"><h2 id="TCP粘包、拆包问题"><a href="#TCP粘包、拆包问题" class="headerlink" title="TCP粘包、拆包问题"></a>TCP粘包、拆包问题</h2><p>熟悉tcp编程的可能都知道，无论是客户端还是服务器，当我们发送或接收数据时都需要考虑tcp底层的粘包和拆包问题。</p>
+<p>TCP是一个流数据，所谓的“流”就是没有界限的遗传数据，就像水流一样，没有界限。TCP并不了解上层业务数据的具体含义，它会根据tcp缓存区的实际情况进行包的划分，也就是说，在业务上，我们的一个完整的包可能会被tcp分成多个包进行发送，我们的多个小包也可能被封装成一个较大的包进行传输，这就是粘包和拆包问题。</p>
+<ul>
+<li><p>粘包，拆包产生的原因：</p>
+<p>1，应用程序write写入的字节大于套接字发送缓冲区的大小</p>
+<p>2，进行MSS大小的TCP分段</p>
+<p>3，以太网帧的payload大于MTU进行IP分片</p>
+</li>
+</ul>
+<h2 id="TCP粘包，拆包问题的解决方案"><a href="#TCP粘包，拆包问题的解决方案" class="headerlink" title="TCP粘包，拆包问题的解决方案"></a>TCP粘包，拆包问题的解决方案</h2><ul>
+<li><p>根据业界主流协议，有以下几种解决方案：</p>
+<p>1,消息定长，例如每个报文固定大小，如果不够，空位补空格</p>
+<pre><code>FlxedLengthFrameDecoder
+
+//设置定长字符串接收
+socketChannel.pipeline().addLast(new FixedLengthFrameDecoder(6));
+socketChannel.pipeline().addLast(new StringDecoder());</code></pre><p>2，在包的尾部增加特殊的分割字符，例如回车等</p>
+<pre><code>DelmiterBasedFrameDecoder
+
+ByteBuf buf = Unpooled.copiedBuffer(&quot;$_&quot;.getBytes());
+socketChannel.pipeline().addLast(new DelimiterBasedFrameDecoder(1024, buf));
+socketChannel.pipeline().addLast(new StringDecoder());</code></pre><p>3，将消息分为消息头和消息体，在消息头中包含表示消息总长度的字段，然后进行逻辑处理</p>
+</li>
+</ul>
+</div></article></div><div class="right-container"><div class="widget"><div id="arAnchorBar"></div></div></div></section></div><div class="right-menu"></div><div class="modal search-modal"><div class="input-field"><input type="text" id="search_input"><label for="search-input">搜索</label></div><div id="search_result" class="search-result"></div></div><div class="blog-overlay"></div><footer class="row"><div class="footer-con"><div class="paginator"><a href="/2017/04/27/linux/ubuntu16.4%E5%9F%BA%E6%9C%AC%E8%BD%AF%E4%BB%B6%E7%9A%84%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8/" title="ubuntu16.4基本软件的安装使用" class="prev">PREV</a><a href="/2017/04/18/categories/live/IBM%E9%85%B1%E6%B2%B9%E8%AE%B0/" title="IBM人工智能培训酱油记" class="next">NEXT</a></div><div class="copyright"><p>© 2017 - 2020 <a target="_blank">马小琥</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> <br> and <a href="https://github.com/Bulandent/hexo-theme-bubuzou" target="_blank">hexo-theme-bubuzou</a></p><p> </p></div><div class="totop"><i></i></div></div></footer><script async src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-MML-AM_CHTML"></script><script src="/scripts/jquery-1.8.2.min.js"></script><script src="/scripts/ar-anchor.js"></script><script src="/scripts/main.js"></script><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;e=o.createElement(i);r=o.getElementsByTagName(i)[0];e.src='//www.google-analytics.com/analytics.js';r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));ga('create',"UA-65933410-1",'auto');ga('send','pageview');</script></body></html>

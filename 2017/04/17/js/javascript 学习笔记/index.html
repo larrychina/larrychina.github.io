@@ -1,0 +1,125 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="baidu-site-verification" content="1EB8XoOl0C"><meta name="google-site-verification" content="K7thEgdLm0UfRWJ5MGdF7sCcjClSzAlxFLPv2Oz5CGM"><title> javascript 学习笔记 · 马小琥's blogs</title><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="javascript 学习笔记 - 马小琥"><meta name="keywords" content="javaScript"><meta name="author" content="马小琥"><link rel="short icon" href="/images/favicon.ico"><link rel="stylesheet" href="/css/bubuzou.css"><link rel="search" type="application/opensearchdescription+xml" href="http://yoursite.com/atom.xml" title="马小琥's blogs"><script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src='//unpkg.com/valine/dist/Valine.min.js'></script><meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="马小琥's blogs" type="application/atom+xml">
+</head><body><header><div class="header row"> <a href="/" class="logo-link"><img src="/images/logo.png"></a><ul id="nav_list" class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" data-hover="博文" class="nav-list-link">博文</a></li><li class="nav-list-item"><a href="/archives/" target="_self" data-hover="归档" class="nav-list-link">归档</a></li><li class="nav-list-item"><a href="/categories/live/" target="_self" data-hover="生活" class="nav-list-link">生活</a></li><li class="nav-list-item"><a href="/categories/film/" target="_self" data-hover="摄影" class="nav-list-link">摄影</a></li><li class="nav-list-item"><a href="/about" target="_self" data-hover="关于" class="nav-list-link">关于</a></li></ul><div class="search"><a id="search_btn" href="#search"></a></div><div id="nav_btn" class="nav-btn"><span></span><span></span><span></span></div></div></header><div class="row scroll-con"><section class="container"><!-- for archive page--><div id="postAr" class="post"><article class="post-block"><h1 class="post-title">javascript 学习笔记</h1><div class="post-info">2017-04-17 01:16:34</div><div class="post-content"><h2 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h2><h3 id="函数的arguments和this"><a href="#函数的arguments和this" class="headerlink" title="函数的arguments和this"></a>函数的arguments和this</h3><pre><code>arguments是函数对象中的一个隐藏属性，通过这个属性可以获取相应的参数值，这个属性其实就传递过来的参数，它是一个数组。
+
+    function say(color){
+        alert(color) ;   // 结果为1
+        for(var cl in arguments){
+            alert(color) ;
+        } // 结果为1；2；3
+    }
+    say(1,2,3) ;
+    /**
+     * arguments这个对象中有个方法callee,arguments.callee(参数)可以反向调用
+     * 比如在递归中可以使用此方法，从而不会导致因函数名改变而发生错误
+      */
+
+当需要创建一个类时，设置该类的属性和方法需要使用this关键字，次用法类似java的this关键字</code></pre><h3 id="函数的属性，call-apply"><a href="#函数的属性，call-apply" class="headerlink" title="函数的属性，call,apply"></a>函数的属性，call,apply</h3><pre><code>函数有两个重要的属性length和prototype:
+
+length在函数中的作用是获取参数的个数：
+
+    function fn1(){}
+    function fn2(a){}
+    function fn3(a,b){}
+
+    fn1.length // 0   fn2.length // 1 fn3.length //2
+
+call 函数名.call(对象，参数列表) ；
+
+apply 函数名.apply(对象，参数数组)</code></pre><h3 id="对象的工厂方式创建和构造函数创建"><a href="#对象的工厂方式创建和构造函数创建" class="headerlink" title="对象的工厂方式创建和构造函数创建"></a>对象的工厂方式创建和构造函数创建</h3><blockquote>
+<p>   通过工厂方式创建对象：</p>
+</blockquote>
+<pre><code>在函数中先创建一个对象，然后为这个对象设置属性和方法，再返回这个对象：
+function createPerson(name,age){
+       var obj = new Object() ;
+       obj.name = name ;
+       obj.age = age ;
+       obj.say = function(){
+           alert(this.name+&quot;:&quot;+this.age) ;
+       }
+}
+
+
+var p = createPerson(&quot;zhangsan&quot;,23) ;
+console.log(typeof p); //始终都是object 无法检测是Person类型（instanceof）</code></pre><blockquote>
+<p>   通过构造函数方式创建对象:</p>
+</blockquote>
+<pre><code>使用构造函数创建对象跟工厂方式类似，它是的函数名就是对象的类名，属性和方法是用this关键字赋值，对象创建使用new关键字：
+
+
+  function Person(name,age){
+       this.name = name ;
+       this.age = age ;
+       this.say = function(){
+           alert(this.name+&quot;:&quot;+this.age) ;
+       }
+  }
+
+  var p1 = new Person(&quot;23&quot;,23) ;
+  var p2 = new Person(&quot;24&quot;,24) ;
+  alert(p1.say == p2.say) ; // false 由此可见，使用这种方式创建的对象每一个对象里都会存在方法的拷
+                                 贝，如果对象行为较多的话，消耗的空间就会很大。
+                                如果把方法设置成全局的行为，则可以被window对象调用，破坏了对象的封装特性，如果全局行为较多的话就会充斥着大量的全局代码，显得开发比较混乱</code></pre><blockquote>
+<p>   js原型对象是一个非常特殊的对象，当一个函数创建后，就会随之产生一个原型对象，当这个函数创建了一个对象，这个对象会指向这个原型对象</p>
+</blockquote>
+<ul>
+<li><p>检测对象是否有prop指向原型:Person.prototype.isPrototypeOf(p) ; // true or false</p>
+<pre><code>// 使用基于原型的创建属性和方法，则为对象专属，window对象不能调用
+
+function Person(){
+
+}
+
+Person.prototype.name = “zhangsan” ;
+Person.prototype.age = 23 ;
+Person.prototype.say = function(){
+
+alert(this.name + this.age) ;
+}
+var Person p = new Person() ;
+p.say() ; // 正常输出
+say() ； //报错</code></pre></li>
+<li><p>p.hasOwnProperty(“属性名”)，检测对象有没有自己设置值：</p>
+<pre><code>var p2 = new Person() ;
+
+p2.name = &quot;lisi&quot; ;
+
+p2.hasOwerProperty(&quot;name&quot;) // true</code></pre></li>
+<li><p>重写原型的方式:</p>
+<pre><code>Person.prototype={
+    constructor:Person, // 不指定时会指向objcet,因为原型被重写了
+    name:&apos;&apos;,
+    age:&apos;&apos;,
+    say:function(){
+    }
+}</code></pre></li>
+</ul>
+<h3 id="js对象继承"><a href="#js对象继承" class="headerlink" title="js对象继承"></a>js对象继承</h3><ul>
+<li><p>基于原型链的方式继承：</p>
+<pre><code>function Parent(){
+
+this.pv = &quot;&quot; ;
+this.name = &quot;larry&quot; ;
+}
+
+Parent.prototype.show = function(){
+
+alert(&quot;parents:&quot;this.name) ;
+}
+
+function Child(){
+
+this.cv = &quot;&quot; ;
+}
+
+Child.prototype = new Parent() ;
+
+Child.prototype.name = “yp” ;
+
+var child = new Child() ;
+
+child.show() // yp</code></pre></li>
+<li><p>基于构造函数的方式继承：<br>略</p>
+</li>
+</ul>
+</div></article></div><div class="right-container"><div class="widget"><div id="arAnchorBar"></div></div></div></section></div><div class="right-menu"></div><div class="modal search-modal"><div class="input-field"><input type="text" id="search_input"><label for="search-input">搜索</label></div><div id="search_result" class="search-result"></div></div><div class="blog-overlay"></div><footer class="row"><div class="footer-con"><div class="paginator"><a href="/2017/04/17/network/netty%E5%9F%BA%E7%A1%80%E4%B9%8Bhelloworld/" title="netty基础之helloworld" class="prev">PREV</a><a href="/2017/04/14/java/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B---Executors/" title="Java并发编程---Executors" class="next">NEXT</a></div><div class="copyright"><p>© 2017 - 2020 <a target="_blank">马小琥</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> <br> and <a href="https://github.com/Bulandent/hexo-theme-bubuzou" target="_blank">hexo-theme-bubuzou</a></p><p> </p></div><div class="totop"><i></i></div></div></footer><script async src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-MML-AM_CHTML"></script><script src="/scripts/jquery-1.8.2.min.js"></script><script src="/scripts/ar-anchor.js"></script><script src="/scripts/main.js"></script><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;e=o.createElement(i);r=o.getElementsByTagName(i)[0];e.src='//www.google-analytics.com/analytics.js';r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));ga('create',"UA-65933410-1",'auto');ga('send','pageview');</script></body></html>

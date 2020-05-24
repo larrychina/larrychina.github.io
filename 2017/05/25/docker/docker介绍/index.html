@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="baidu-site-verification" content="1EB8XoOl0C"><meta name="google-site-verification" content="K7thEgdLm0UfRWJ5MGdF7sCcjClSzAlxFLPv2Oz5CGM"><title> docker介绍 · 马小琥's blogs</title><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="docker介绍 - 马小琥"><meta name="keywords" content="生活"><meta name="author" content="马小琥"><link rel="short icon" href="/images/favicon.ico"><link rel="stylesheet" href="/css/bubuzou.css"><link rel="search" type="application/opensearchdescription+xml" href="http://yoursite.com/atom.xml" title="马小琥's blogs"><script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src='//unpkg.com/valine/dist/Valine.min.js'></script><meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="马小琥's blogs" type="application/atom+xml">
+</head><body><header><div class="header row"> <a href="/" class="logo-link"><img src="/images/logo.png"></a><ul id="nav_list" class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" data-hover="博文" class="nav-list-link">博文</a></li><li class="nav-list-item"><a href="/archives/" target="_self" data-hover="归档" class="nav-list-link">归档</a></li><li class="nav-list-item"><a href="/categories/live/" target="_self" data-hover="生活" class="nav-list-link">生活</a></li><li class="nav-list-item"><a href="/categories/film/" target="_self" data-hover="摄影" class="nav-list-link">摄影</a></li><li class="nav-list-item"><a href="/about" target="_self" data-hover="关于" class="nav-list-link">关于</a></li></ul><div class="search"><a id="search_btn" href="#search"></a></div><div id="nav_btn" class="nav-btn"><span></span><span></span><span></span></div></div></header><div class="row scroll-con"><section class="container"><!-- for archive page--><div id="postAr" class="post"><article class="post-block"><h1 class="post-title">docker介绍</h1><div class="post-info">2017-05-25 12:55:34</div><div class="post-content"><h2 id="docker介绍"><a href="#docker介绍" class="headerlink" title="docker介绍"></a>docker介绍</h2><p>docker是一个开源的应用容器引擎，让开发者可以打包自己的应用或者依赖到一个可移植的容器中，然后发布到任何流行的linux上。docker完全采用沙箱机制，相互之间不会有任何接口。<a id="more"></a></p>
+<h2 id="docker理解"><a href="#docker理解" class="headerlink" title="docker理解"></a>docker理解</h2><p>标准化：运输方式，API接口，存储方式</p>
+<p>隔离： 通过内核的namespace，包括进程、网络、进程间通信信号、文件系统、用户等，不同的docker使用不同的 namespace</p>
+<pre><code>1、进程的namespace, docker container里运行的进程的父进程是这个docker container的进程。这样不同的    container 之间进程就被隔离开了。
+2、网络的namespace ,每个container 都有自己的虚拟网络设备，IP地址，路由。
+3、进程间交互的namespace，每个container 内的进程可以实现进程进的信号、共享内存、消息队列的交互
+4、mnt的namespace ，不同的namespacer进程看到的文件结构是不同的
+5、UTS 的namespace ，不同的container 可以有自己的hostname和domainame
+6、用户的namespae,每个container可以有自己的用户和用户分组    </code></pre><p>集装箱：它可以把任何应用及相关依赖项打包成一个轻量、可移植、自包涵式的容器</p>
+<p>作用：<br>    1，解决运行环境不一致带来的问题。<br>    2，docker的标准化让快速扩展和弹性伸缩变得简单</p>
+<p>镜像的存储格式：linux 分层存储</p>
+<p>容器：其实就是个进程，可以看作一个虚拟机，是可以修改的，而镜像是不可以修改的</p>
+<p>仓库：</p>
+<p>基本命令：</p>
+<ul>
+<li>从远程仓库拉取镜像：docker pull [镜像名称]：[TAG（默认lasted）]</li>
+<li>查看本地镜像：docker image</li>
+<li>后台运行：docker run [options]-d imgage:TAG [command]</li>
+<li>docker ps 查看</li>
+<li>进入一个正在运行的容器：docker exec [options] [imageId] bash</li>
+<li>停止正在运行的容器: docker stop -f [imageId]<br>端口映射：docker run -d -p 主机端口：容器端口 容器id(-P 开放所有端口映射到随机端口)</li>
+</ul>
+<h2 id="docker网络"><a href="#docker网络" class="headerlink" title="docker网络"></a>docker网络</h2><p>网络类型：</p>
+<pre><code>bridge：桥接
+Host：云主机共享ip和端口
+None：docker将不会和外界进行通讯</code></pre><p>使用bridge模式时，通过端口映射将主机端口和容器里的端口做一个映射，容器和主机网卡通过网桥连接</p>
+<p>netstat -na|grep 8080</p>
+<h2 id="第一个自己的镜像"><a href="#第一个自己的镜像" class="headerlink" title="第一个自己的镜像"></a>第一个自己的镜像</h2><p>Dockerfile 创建一个dockerfile</p>
+<p>1，下载一个tomcat镜像，这个镜像已经包含jdk</p>
+<ul>
+<li><p>vi Dockerfile</p>
+</li>
+<li><p>from 镜像名字</p>
+</li>
+<li><p>MAINTAINER username email(镜像的所有者) </p>
+</li>
+<li><p>COPY web应用全路径 /usr/local/tomcat/webapps(应用目录)</p>
+</li>
+</ul>
+<p>2,构建镜像</p>
+<ul>
+<li><p>docker build -t xxx:latest 镜像目录(当前Dockerfie目录用.表示)</p>
+</li>
+<li><p>docker build –help </p>
+</li>
+<li><p>Docker build</p>
+</li>
+</ul>
+<p>3，启动自己镜像</p>
+<p>例如：jpress(web应用)</p>
+</div></article></div><div class="right-container"><div class="widget"><div id="arAnchorBar"></div></div></div></section></div><div class="right-menu"></div><div class="modal search-modal"><div class="input-field"><input type="text" id="search_input"><label for="search-input">搜索</label></div><div id="search_result" class="search-result"></div></div><div class="blog-overlay"></div><footer class="row"><div class="footer-con"><div class="paginator"><a href="/2017/04/27/network/netty%E4%B9%8BUDP%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/" title="netty之UDP网络编程" class="next">NEXT</a></div><div class="copyright"><p>© 2017 - 2020 <a target="_blank">马小琥</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> <br> and <a href="https://github.com/Bulandent/hexo-theme-bubuzou" target="_blank">hexo-theme-bubuzou</a></p><p> </p></div><div class="totop"><i></i></div></div></footer><script async src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-MML-AM_CHTML"></script><script src="/scripts/jquery-1.8.2.min.js"></script><script src="/scripts/ar-anchor.js"></script><script src="/scripts/main.js"></script><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;e=o.createElement(i);r=o.getElementsByTagName(i)[0];e.src='//www.google-analytics.com/analytics.js';r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));ga('create',"UA-65933410-1",'auto');ga('send','pageview');</script></body></html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="baidu-site-verification" content="1EB8XoOl0C"><meta name="google-site-verification" content="K7thEgdLm0UfRWJ5MGdF7sCcjClSzAlxFLPv2Oz5CGM"><title> Java并发编程---锁 · 马小琥's blogs</title><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Java并发编程---锁 - 马小琥"><meta name="keywords" content="学习 java 并发"><meta name="author" content="马小琥"><link rel="short icon" href="/images/favicon.ico"><link rel="stylesheet" href="/css/bubuzou.css"><link rel="search" type="application/opensearchdescription+xml" href="http://yoursite.com/atom.xml" title="马小琥's blogs"><script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src='//unpkg.com/valine/dist/Valine.min.js'></script><meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="马小琥's blogs" type="application/atom+xml">
+</head><body><header><div class="header row"> <a href="/" class="logo-link"><img src="/images/logo.png"></a><ul id="nav_list" class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" data-hover="博文" class="nav-list-link">博文</a></li><li class="nav-list-item"><a href="/archives/" target="_self" data-hover="归档" class="nav-list-link">归档</a></li><li class="nav-list-item"><a href="/categories/live/" target="_self" data-hover="生活" class="nav-list-link">生活</a></li><li class="nav-list-item"><a href="/categories/film/" target="_self" data-hover="摄影" class="nav-list-link">摄影</a></li><li class="nav-list-item"><a href="/about" target="_self" data-hover="关于" class="nav-list-link">关于</a></li></ul><div class="search"><a id="search_btn" href="#search"></a></div><div id="nav_btn" class="nav-btn"><span></span><span></span><span></span></div></div></header><div class="row scroll-con"><section class="container"><!-- for archive page--><div id="postAr" class="post"><article class="post-block"><h1 class="post-title">Java并发编程---锁</h1><div class="post-info">2017-04-17 01:55:34</div><div class="post-content"><p>在Java多线程中，我们可以使用synchronized关键字来实现线程之间的同步互斥工作，jdk中定义了另一种更优秀的完成这个“同步互斥”工作的对象，那就是LOCK，相比synchronized而言，LOCK对象支持嗅探锁定，多路分支的功能。</p>
+<h2 id="重入锁"><a href="#重入锁" class="headerlink" title="重入锁"></a>重入锁</h2><p><strong>ReentrantLock</strong>:在代码需要同步的地方加上锁定，但是不要忘记最后一定要释放锁，不然会产生死锁，其他线程永远进不来。</p>
+<pre><code>private Lock lock = new ReentrantLock();
+
+public void method1(){
+        try {
+            lock.lock();
+            System.out.println(&quot;当前线程:&quot; + Thread.currentThread().getName() + &quot;进入method1..&quot;);
+            Thread.sleep(1000);
+            System.out.println(&quot;当前线程:&quot; + Thread.currentThread().getName() + &quot;退出method1..&quot;);
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
+        }
+    }</code></pre><p>参考：<a href="http://blog.csdn.net/fw0124/article/details/6672522" target="_blank" rel="noopener">http://blog.csdn.net/fw0124/article/details/6672522</a></p>
+<h2 id="锁与等待-通知"><a href="#锁与等待-通知" class="headerlink" title="锁与等待/通知"></a>锁与等待/通知</h2><p>在之前我们使用synchronized时，如果需要多线程之间的协作，则需要使用Object的wait(),notify()和notifyAll()方法进行配合工作。</p>
+<p>条件变量Condition,很类似wait，notify（）方法的用法，condition一定是针对某一把锁的。</p>
+<ul>
+<li><p>锁特性：如果是公平锁，线程则按照FIFO顺序从condition.await（）中释放，如果是非公平锁，后序通过竞争就不能保证FIFO的顺序了。</p>
+<pre><code>public ReentrantLock(boolean fair) {
+   sync = fair ? new FairSync() : new NonfairSync();
+}</code></pre></li>
+<li><p>我们可以通过一个lock对象，产生多个condition来进行多线程的交互,可以是部分唤醒。</p>
+<pre><code>public class UseManyCondition {
+private ReentrantLock lock = new ReentrantLock();
+private Condition c1 = lock.newCondition();
+private Condition c2 = lock.newCondition();
+
+public void m1(){
+    try {
+        lock.lock();
+        System.out.println(&quot;当前线程：&quot; +Thread.currentThread().getName() + &quot;进入方法m1等待..&quot;);
+        c1.await();
+        System.out.println(&quot;当前线程：&quot; +Thread.currentThread().getName() + &quot;方法m1继续..&quot;);
+    } catch (Exception e) {
+        e.printStackTrace();
+    } finally {
+        lock.unlock();
+    }
+}
+
+public void m2(){
+    try {
+        lock.lock();
+        System.out.println(&quot;当前线程：&quot; +Thread.currentThread().getName() + &quot;进入方法m2等待..&quot;);
+        c1.await();
+        System.out.println(&quot;当前线程：&quot; +Thread.currentThread().getName() + &quot;方法m2继续..&quot;);
+    } catch (Exception e) {
+        e.printStackTrace();
+    } finally {
+        lock.unlock();
+    }
+}
+
+public void m3(){
+    try {
+        lock.lock();
+        System.out.println(&quot;当前线程：&quot; +Thread.currentThread().getName() + &quot;进入方法m3等待..&quot;);
+        c2.await();
+        System.out.println(&quot;当前线程：&quot; +Thread.currentThread().getName() + &quot;方法m3继续..&quot;);
+    } catch (Exception e) {
+        e.printStackTrace();
+    } finally {
+        lock.unlock();
+    }
+}
+
+public void m4(){
+    try {
+        lock.lock();
+        System.out.println(&quot;当前线程：&quot; +Thread.currentThread().getName() + &quot;唤醒..&quot;);
+        c1.signalAll();
+    } catch (Exception e) {
+        e.printStackTrace();
+    } finally {
+        lock.unlock();
+    }
+}
+
+public void m5(){
+    try {
+        lock.lock();
+        System.out.println(&quot;当前线程：&quot; +Thread.currentThread().getName() + &quot;唤醒..&quot;);
+        c2.signal();
+    } catch (Exception e) {
+        e.printStackTrace();
+    } finally {
+        lock.unlock();
+    }
+}
+public static void main(String[] args) {
+
+    final UseManyCondition umc = new UseManyCondition();
+    Thread t1 = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            umc.m1();
+        }
+    },&quot;t1&quot;);
+    Thread t2 = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            umc.m2();
+        }
+    },&quot;t2&quot;);
+    Thread t3 = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            umc.m3();
+        }
+    },&quot;t3&quot;);
+    Thread t4 = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            umc.m4();
+        }
+    },&quot;t4&quot;);
+    Thread t5 = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            umc.m5();
+        }
+    },&quot;t5&quot;);
+
+    t1.start();    // c1
+    t2.start();    // c1
+    t3.start();    // c2
+    try {
+        Thread.sleep(2000);
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+
+    t4.start();    // c1
+    try {
+        Thread.sleep(2000);
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+    t5.start();    // c2
+
+    }
+}</code></pre></li>
+<li><p>lock.getHoldCount()方法：查询当前线程保持锁的个数(代码略)。</p>
+</li>
+</ul>
+<h2 id="读写锁"><a href="#读写锁" class="headerlink" title="读写锁"></a>读写锁</h2><p>读写锁ReentrantReadWriteLock,其实就是实现读写分离的锁，在高并发下，尤其是读多写少的情况下性能远高于重入锁。相比sysnchronized和ReentLock，读锁可以在同一时间内被多个线程并发访问。</p>
+<p>其核心思想是：读读共享，写写互斥，读写互斥。</p>
+<pre><code>public class UseReentrantReadWriteLock {
+
+private ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
+private ReadLock readLock = rwLock.readLock();
+private WriteLock writeLock = rwLock.writeLock();
+
+public void read(){
+    try {
+        readLock.lock();
+        System.out.println(&quot;当前线程:&quot; + Thread.currentThread().getName() + &quot;进入...&quot;);
+        Thread.sleep(3000);
+        System.out.println(&quot;当前线程:&quot; + Thread.currentThread().getName() + &quot;退出...&quot;);
+    } catch (Exception e) {
+        e.printStackTrace();
+    } finally {
+        readLock.unlock();
+    }
+}
+
+public void write(){
+    try {
+        writeLock.lock();
+        System.out.println(&quot;当前线程:&quot; + Thread.currentThread().getName() + &quot;进入...&quot;);
+        Thread.sleep(3000);
+        System.out.println(&quot;当前线程:&quot; + Thread.currentThread().getName() + &quot;退出...&quot;);
+    } catch (Exception e) {
+        e.printStackTrace();
+    } finally {
+        writeLock.unlock();
+    }
+}
+
+public static void main(String[] args) {
+
+    final UseReentrantReadWriteLock urrw = new UseReentrantReadWriteLock();
+
+    Thread t1 = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            urrw.read();
+        }
+    }, &quot;t1&quot;);
+    Thread t2 = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            urrw.read();
+        }
+    }, &quot;t2&quot;);
+    Thread t3 = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            urrw.write();
+        }
+    }, &quot;t3&quot;);
+    Thread t4 = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            urrw.write();
+        }
+    }, &quot;t4&quot;);        
+//        t1.start();
+//        t2.start();
+
+//        t1.start(); // R 
+//        t3.start(); // W
+        t3.start();
+        t4.start();
+    }
+}</code></pre></div></article></div><div class="right-container"><div class="widget"><div id="arAnchorBar"></div></div></div></section></div><div class="right-menu"></div><div class="modal search-modal"><div class="input-field"><input type="text" id="search_input"><label for="search-input">搜索</label></div><div id="search_result" class="search-result"></div></div><div class="blog-overlay"></div><footer class="row"><div class="footer-con"><div class="paginator"><a href="/2017/04/18/categories/live/IBM%E9%85%B1%E6%B2%B9%E8%AE%B0/" title="IBM人工智能培训酱油记" class="prev">PREV</a><a href="/2017/04/17/network/netty%E5%9F%BA%E7%A1%80%E4%B9%8Bhelloworld/" title="netty基础之helloworld" class="next">NEXT</a></div><div class="copyright"><p>© 2017 - 2020 <a target="_blank">马小琥</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> <br> and <a href="https://github.com/Bulandent/hexo-theme-bubuzou" target="_blank">hexo-theme-bubuzou</a></p><p> </p></div><div class="totop"><i></i></div></div></footer><script async src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-MML-AM_CHTML"></script><script src="/scripts/jquery-1.8.2.min.js"></script><script src="/scripts/ar-anchor.js"></script><script src="/scripts/main.js"></script><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;e=o.createElement(i);r=o.getElementsByTagName(i)[0];e.src='//www.google-analytics.com/analytics.js';r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));ga('create',"UA-65933410-1",'auto');ga('send','pageview');</script></body></html>

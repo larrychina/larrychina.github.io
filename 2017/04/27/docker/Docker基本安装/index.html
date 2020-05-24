@@ -1,0 +1,39 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="baidu-site-verification" content="1EB8XoOl0C"><meta name="google-site-verification" content="K7thEgdLm0UfRWJ5MGdF7sCcjClSzAlxFLPv2Oz5CGM"><title> Docker基本安装 · 马小琥's blogs</title><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Docker基本安装 - 马小琥"><meta name="keywords" content="学习 docker"><meta name="author" content="马小琥"><link rel="short icon" href="/images/favicon.ico"><link rel="stylesheet" href="/css/bubuzou.css"><link rel="search" type="application/opensearchdescription+xml" href="http://yoursite.com/atom.xml" title="马小琥's blogs"><script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src='//unpkg.com/valine/dist/Valine.min.js'></script><meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="马小琥's blogs" type="application/atom+xml">
+</head><body><header><div class="header row"> <a href="/" class="logo-link"><img src="/images/logo.png"></a><ul id="nav_list" class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" data-hover="博文" class="nav-list-link">博文</a></li><li class="nav-list-item"><a href="/archives/" target="_self" data-hover="归档" class="nav-list-link">归档</a></li><li class="nav-list-item"><a href="/categories/live/" target="_self" data-hover="生活" class="nav-list-link">生活</a></li><li class="nav-list-item"><a href="/categories/film/" target="_self" data-hover="摄影" class="nav-list-link">摄影</a></li><li class="nav-list-item"><a href="/about" target="_self" data-hover="关于" class="nav-list-link">关于</a></li></ul><div class="search"><a id="search_btn" href="#search"></a></div><div id="nav_btn" class="nav-btn"><span></span><span></span><span></span></div></div></header><div class="row scroll-con"><section class="container"><!-- for archive page--><div id="postAr" class="post"><article class="post-block"><h1 class="post-title">Docker基本安装</h1><div class="post-info">2017-04-27 02:24:34</div><div class="post-content"><h2 id="centos-readhat上安装docker"><a href="#centos-readhat上安装docker" class="headerlink" title="centos/readhat上安装docker"></a>centos/readhat上安装docker</h2><h3 id="前置条件"><a href="#前置条件" class="headerlink" title="前置条件"></a>前置条件</h3><ul>
+<li><p>64-bit 系统</p>
+</li>
+<li><p>kernel 3.8+  <a id="more"></a><br>1，检查linux版本内核：</p>
+<p>uname -r</p>
+</li>
+</ul>
+<p>2，使用sudo 或是 root 权限</p>
+<p>3，确保yum是最新的</p>
+<pre><code>yum update</code></pre><p>4,添加yum仓库：</p>
+<pre><code>tee /etc/yum.repos.d/docker.repo &lt;&lt;-&apos;EOF
+[dockerrepo]
+name=Docker Repository
+baseurl=https://yum.dockerproject.org/repo/main/centos/
+enabled=1
+gpgcheck=1
+gpgkey=https://yum.dockerproject.org/gpg
+EOF</code></pre><p>5，安装Docker</p>
+<pre><code>yum install -y docker-engine</code></pre><p>6, 启动Docker</p>
+<pre><code>systemctl start docker.service</code></pre><p>7，查看是否启动成功（client和service两部分表示docker安装启动成功了）,执行命令：</p>
+<pre><code>docker version</code></pre><p>结果：</p>
+<pre><code>Client:
+ Version:      17.04.0-ce
+ API version:  1.28
+ Go version:   go1.7.5
+ Git commit:   4845c56
+ Built:        Mon Apr  3 18:01:50 2017
+ OS/Arch:      linux/amd64
+
+Server:
+ Version:      17.04.0-ce
+ API version:  1.28 (minimum version 1.12)
+ Go version:   go1.7.5
+ Git commit:   4845c56
+ Built:        Mon Apr  3 18:01:50 2017
+ OS/Arch:      linux/amd64
+ Experimental: false</code></pre></div></article></div><div class="right-container"><div class="widget"><div id="arAnchorBar"></div></div></div></section></div><div class="right-menu"></div><div class="modal search-modal"><div class="input-field"><input type="text" id="search_input"><label for="search-input">搜索</label></div><div id="search_result" class="search-result"></div></div><div class="blog-overlay"></div><footer class="row"><div class="footer-con"><div class="paginator"><a href="/2017/04/27/network/netty%E4%B9%8BUDP%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/" title="netty之UDP网络编程" class="prev">PREV</a><a href="/2017/04/27/linux/ubuntu16.4%E5%9F%BA%E6%9C%AC%E8%BD%AF%E4%BB%B6%E7%9A%84%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8/" title="ubuntu16.4基本软件的安装使用" class="next">NEXT</a></div><div class="copyright"><p>© 2017 - 2020 <a target="_blank">马小琥</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> <br> and <a href="https://github.com/Bulandent/hexo-theme-bubuzou" target="_blank">hexo-theme-bubuzou</a></p><p> </p></div><div class="totop"><i></i></div></div></footer><script async src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-MML-AM_CHTML"></script><script src="/scripts/jquery-1.8.2.min.js"></script><script src="/scripts/ar-anchor.js"></script><script src="/scripts/main.js"></script><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;e=o.createElement(i);r=o.getElementsByTagName(i)[0];e.src='//www.google-analytics.com/analytics.js';r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));ga('create',"UA-65933410-1",'auto');ga('send','pageview');</script></body></html>
